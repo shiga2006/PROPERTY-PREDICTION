@@ -1,0 +1,148 @@
+import tkinter as tk
+from tkinter import messagebox
+import joblib
+from sklearn.preprocessing import LabelEncoder, StandardScaler
+import numpy as np
+
+class MaterialModelApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("PROPERTY PREDICTION")
+
+        # Center the window
+        window_width = 600
+        window_height = 550
+        screen_width = root.winfo_screenwidth()
+        screen_height = root.winfo_screenheight()
+        position_top = int(screen_height / 2 - window_height / 2)
+        position_right = int(screen_width / 2 - window_width / 2)
+        root.geometry(f'{window_width}x{window_height}+{position_right}+{position_top}')
+
+        # Title Label
+        self.title_label = tk.Label(root, text="PROPERTY PREDICTION", font=("Arial", 20, "bold"))
+        self.title_label.pack(pady=20)
+
+        # Materials Dropdown
+        self.material_label = tk.Label(root, text="Select Material", font=("Arial", 14))
+        self.material_label.pack()
+
+        self.materials = ["PETG", "PLA", "TPE", "ABS"]
+        self.material_var = tk.StringVar()
+        self.material_var.set(self.materials[0])
+
+        self.material_menu = tk.OptionMenu(root, self.material_var, *self.materials)
+        self.material_menu.config(font=("Arial", 12), width=20)
+        self.material_menu.pack(pady=10)
+
+        # Parameters Dropdown
+        self.parameter_label = tk.Label(root, text="Select Property to Predict", font=("Arial", 14))
+        self.parameter_label.pack(pady=10)
+
+        self.parameters = ["Tensile Strength", "Hardness", "Compressive Strength"]
+        self.parameter_var = tk.StringVar()
+        self.parameter_var.set(self.parameters[0])
+
+        self.parameter_menu = tk.OptionMenu(root, self.parameter_var, *self.parameters)
+        self.parameter_menu.config(font=("Arial", 12), width=20)
+        self.parameter_menu.pack(pady=10)
+
+        # Infill Pattern Dropdown
+        self.infill_label = tk.Label(root, text="Select Infill Pattern", font=("Arial", 14))
+        self.infill_label.pack(pady=10)
+
+        self.infill_patterns = ["Lines", "Cubic", "Trihexagonal", "Triangle", "Grid"]
+        self.infill_var = tk.StringVar()
+        self.infill_var.set(self.infill_patterns[0])
+
+        self.infill_menu = tk.OptionMenu(root, self.infill_var, *self.infill_patterns)
+        self.infill_menu.config(font=("Arial", 12), width=20)
+        self.infill_menu.pack(pady=10)
+
+        # Create a frame for Layer Height, Infill Density, and Raster Orientation
+        self.param_frame = tk.Frame(root)
+        self.param_frame.pack(pady=10)
+
+        # Layer Height Entry
+        self.layer_label = tk.Label(self.param_frame, text="Layer Height (mm)", font=("Arial", 14))
+        self.layer_label.grid(row=0, column=0, padx=10)
+
+        self.layer_entry = tk.Entry(self.param_frame, font=("Arial", 12), width=10)
+        self.layer_entry.grid(row=1, column=0, padx=10)
+
+        # Infill Density Entry
+        self.density_label = tk.Label(self.param_frame, text="Infill Density (%)", font=("Arial", 14))
+        self.density_label.grid(row=0, column=1, padx=10)
+
+        self.density_entry = tk.Entry(self.param_frame, font=("Arial", 12), width=10)
+        self.density_entry.grid(row=1, column=1, padx=10)
+
+        # Raster Orientation Entry
+        self.raster_label = tk.Label(self.param_frame, text="Raster Orientation (degrees)", font=("Arial", 14))
+        self.raster_label.grid(row=0, column=2, padx=10)
+
+        self.raster_entry = tk.Entry(self.param_frame, font=("Arial", 12), width=10)
+        self.raster_entry.grid(row=1, column=2, padx=10)
+
+        # Predict Button
+        self.predict_button = tk.Button(root, text="Predict Property", command=self.evaluate_model, font=("Arial", 14), width=20)
+        self.predict_button.pack(pady=20)
+
+        # Load the optimized Random Forest model
+        try:
+            self.model = joblib.load('optimized_xgboost_model.pkl')
+        except Exception as e:
+            messagebox.showerror("Model Load Error", f"Could not load the model: {str(e)}")
+            self.model = None
+
+    def evaluate_model(self):
+        # Ensure the model is loaded
+        if self.model is None:
+            messagebox.showerror("Error", "Model is not loaded. Please check the model file.")
+            return
+
+        # Get user inputs
+        try:
+            material = self.material_var.get()
+            infill_pattern = self.infill_var.get()
+            layer_height = float(self.layer_entry.get())
+            infill_density = float(self.density_entry.get())
+            raster_orientation = float(self.raster_entry.get())
+        except ValueError:
+            messagebox.showerror("Input Error", "Please enter valid numerical values for layer height, infill density, and raster orientation.")
+            return
+
+        # Encode the categorical variables
+        material_encoder = {"PETG": 0, "PLA": 1, "TPE": 2, "ABS": 3}
+        infill_encoder = {"Lines": 0, "Cubic": 1, "Trihexagonal": 2, "Triangle": 3, "Grid": 4}
+
+        material_encoded = material_encoder[material]
+        infill_pattern_encoded = infill_encoder[infill_pattern]
+
+        # Create input feature array
+        input_features = np.array([[material_encoded, infill_density, infill_pattern_encoded, raster_orientation]])
+
+        # Standardize the infill density
+        scaler = StandardScaler()
+        input_features[:, 1] = scaler.fit_transform(input_features[:, 1].reshape(-1, 1)).flatten()
+
+        # Predict using the loaded model
+        try:
+            prediction = self.model.predict(input_features)
+
+            selected_parameter = self.parameter_var.get()
+            if selected_parameter == "Tensile Strength":
+                predicted_value = prediction[0][0]
+            elif selected_parameter == "Hardness":
+                predicted_value = prediction[0][1]
+            elif selected_parameter == "Compressive Strength":
+                predicted_value = prediction[0][2]
+
+            messagebox.showinfo("Predicted Value", f"Predicted {selected_parameter}: {predicted_value:.4f}")
+
+        except Exception as e:
+            messagebox.showerror("Error", f"Error during prediction: {str(e)}")
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = MaterialModelApp(root)
+    root.mainloop()
