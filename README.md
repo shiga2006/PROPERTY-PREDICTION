@@ -19,7 +19,8 @@ This project helps you do just that—using machine learning to predict mechanic
 📚 Understand how printing parameters really affect your results
 
  How It Works
-We’ve trained a Random Forest model (with some help from XGBoost) on real experimental data. Feed it your desired print settings, and it predicts:
+ 
+I’ve trained a Random Forest model (with some help from XGBoost) on real experimental data. Feed it your desired print settings, and it predicts:
 |    Property              | What it Tells You                           |
 | ------------------------ | ------------------------------------------- |
 | **Tensile Strength**     | Will it resist breaking when pulled?        |
@@ -28,6 +29,7 @@ We’ve trained a Random Forest model (with some help from XGBoost) on real expe
 
 
 Input Parameters
+
 Here’s what the system needs from you:
 | 🔧 Parameter           | 📖 Description                                        |
 | ---------------------- | ----------------------------------------------------- |
