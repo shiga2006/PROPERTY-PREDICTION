@@ -241,31 +241,10 @@ We welcome contributions from the 3D printing and ML communities!
 - 📚 **Documentation**: Improve guides and tutorials
 - 🧪 **Testing**: Validate predictions with real prints
 
----
 
-## 📄 License & Citation
-
-This project is available under the MIT License for academic and commercial use.
-
-```bibtex
-@misc{intelligent_3d_printing_2024,
-  title={Intelligent Forecasting in 3D Printing: ML-Powered Mechanical Property Prediction},
-  author={Shivashiga A.M},
-  year={2024},
-  url={https://github.com/yourusername/intelligent-3d-printing-forecasting}
-}
-```
-
----
-
-<div align="center">
 
 ## 🙌 Let's Make 3D Printing Smarter
 
-Whether you're an **engineer**, **student**, **researcher**, or just a **3D printing enthusiast**—this tool helps you make better prints, faster, with the power of data-driven intelligence.
-
-[![GitHub stars](https://img.shields.io/github/stars/yourusername/intelligent-3d-printing-forecasting?style=social)](https://github.com/yourusername/intelligent-3d-printing-forecasting)
-[![GitHub forks](https://img.shields.io/github/forks/yourusername/intelligent-3d-printing-forecasting?style=social)](https://github.com/yourusername/intelligent-3d-printing-forecasting)
 
 **🚀 Transform your 3D printing workflow today!**
 
